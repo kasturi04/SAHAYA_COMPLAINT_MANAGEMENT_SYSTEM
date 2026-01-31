@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <div class="card shadow p-4 bg-white" style="border-radius: 15px; border-top: 5px solid #0056b3;">
+            <h4 class="fw-bold text-primary mb-4 text-center">Submit Grievance with Proof</h4>
+            
+            <form method="POST" enctype="multipart/form-data">
+                <div class="mb-4">
+                    <label class="fw-bold small">📍 Current Location</label>
+                    <textarea name="address" id="addr_field" class="form-control bg-light mb-2" rows="2" readonly required placeholder="Click button to fetch location..."></textarea>
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="fetchGPS()">Get My Location</button>
+                </div>
+
+                <div class="mb-4 p-3 border rounded bg-white">
+                    <label class="fw-bold mb-2">📸 Attach Proof (Photo/File)</label>
+                    <input type="file" name="proof_file" id="fileInput" class="form-control mb-3" accept="image/*">
+                    
+                    <div class="text-center p-3 border rounded bg-light">
+                        <h6 class="small fw-bold">OR Use Live Camera</h6>
+                        <video id="webcam" autoplay playsinline class="w-100 rounded mb-2" style="max-height: 200px; display:none;"></video>
+                        <canvas id="canvas" style="display:none;"></canvas>
+                        
+                        <button type="button" id="startBtn" class="btn btn-outline-primary btn-sm" onclick="startCamera()">Open Camera</button>
+                        <button type="button" id="captureBtn" class="btn btn-success btn-sm" style="display:none;" onclick="takePhoto()">Capture Photo</button>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="fw-bold">Grievance Description</label>
+                    <textarea name="description" class="form-control" rows="4" required placeholder="Describe your issue in detail..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-3 fw-bold shadow">Submit Application</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// GPS Logic
+function fetchGPS() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((pos) => {
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`)
+            .then(res => res.json()).then(data => {
+                document.getElementById('addr_field').value = data.display_name;
+            });
+        });
+    }
+}
+
+// Camera Logic
+let video = document.getElementById('webcam');
+async function startCamera() {
+    video.style.display = "block";
+    document.getElementById('captureBtn').style.display = "inline-block";
+    document.getElementById('startBtn').style.display = "none";
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = stream;
+}
+
+function takePhoto() {
+    let canvas = document.getElementById('canvas');
+    canvas.width = video.videoWidth; 
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    
+    canvas.toBlob(blob => {
+        let file = new File([blob], "proof.jpg", { type: "image/jpeg" });
+        let container = new DataTransfer(); 
+        container.items.add(file);
+        document.getElementById('fileInput').files = container.files;
+        alert("Photo Attached Successfully!");
+        
+        video.style.display = "none";
+        document.getElementById('captureBtn').style.display = "none";
+        document.getElementById('startBtn').style.display = "inline-block";
+    }, 'image/jpeg');
+}
+</script>
+{% endblock %}

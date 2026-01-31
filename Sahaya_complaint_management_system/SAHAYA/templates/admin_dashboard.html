@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="card shadow-lg border-0" style="border-radius: 15px; overflow: hidden;">
+        <div class="card-header bg-primary text-white p-3 d-flex justify-content-between align-items-center">
+            <h4 class="mb-0 fw-bold">🏛️ Official Grievance Redressal Dashboard</h4>
+            <span class="badge bg-light text-primary fw-bold">Active Sessions: Admin</span>
+        </div>
+
+        <div class="card-body bg-white p-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light text-secondary text-uppercase small fw-bold">
+                        <tr>
+                            <th style="width: 5%;">ID</th>
+                            <th style="width: 20%;">Department (AI Classified)</th>
+                            <th style="width: 30%;">Grievance Description</th>
+                            <th style="width: 15%;">Evidence Proof</th>
+                            <th style="width: 10%;">Current Status</th>
+                            <th style="width: 20%;">Action (Government Response)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for complaint in complaints %}
+                        <tr>
+                            <td class="fw-bold text-muted">#{{ complaint.complaint_id }}</td>
+                            <td>
+                                <span class="badge rounded-pill bg-info text-dark px-3">{{ complaint.category }}</span>
+                            </td>
+                            <td class="small">{{ complaint.description }}</td>
+                            <td>
+                                {% if complaint.proof_image %}
+                                <a href="{{ url_for('static', filename='uploads/' + complaint.proof_image) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    🖼️ View Proof
+                                </a>
+                                {% else %}
+                                <span class="text-muted italic small">No Proof Attached</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if complaint.status == 'Pending' %}
+                                <span class="badge bg-warning text-dark px-3">{{ complaint.status }}</span>
+                                {% elif complaint.status == 'Resolved' %}
+                                <span class="badge bg-success px-3">{{ complaint.status }}</span>
+                                {% else %}
+                                <span class="badge bg-secondary px-3">{{ complaint.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                             <form action="{{ url_for('update_status', complaint_id=complaint.complaint_id) }}" method="POST">
+                                    <select name="new_status" class="form-select form-select-sm border-primary">
+                                        <option value="In Progress" {% if complaint.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                                        <option value="Resolved" {% if complaint.status == 'Resolved' %}selected{% endif %}>Resolved</option>
+                                        <option value="Rejected" {% if complaint.status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-primary btn-sm fw-bold">Update</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if not complaints %}
+                <div class="text-center py-5">
+                    <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" width="80" class="mb-3 opacity-50">
+                    <h5 class="text-muted">No pending grievances found in the system.</h5>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Professional Styling for Admin */
+    .table thead th { border-bottom: 2px solid #dee2e6; }
+    .btn-sm { font-size: 0.8rem; border-radius: 8px; }
+    .form-select-sm { font-size: 0.85rem; border-radius: 8px; }
+    .badge { font-weight: 500; }
+</style>
+{% endblock %}

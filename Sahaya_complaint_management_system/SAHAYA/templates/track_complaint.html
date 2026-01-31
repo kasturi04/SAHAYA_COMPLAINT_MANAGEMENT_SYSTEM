@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-11">
+        <div class="glass-card shadow-sm p-4 bg-white" style="border-radius: 20px;">
+            <h3 class="text-primary fw-bold mb-4">My Grievance Status</h3>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>AI Allocated Department</th> <th>Issue Description</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for complaint in complaints %}
+                        <tr>
+                            <td><b>#{{ complaint.complaint_id }}</b></td>
+                            <td><span class="badge bg-info text-dark">{{ complaint.category }}</span></td>
+                            <td>{{ complaint.description[:40] }}...</td>
+                            <td><span class="badge bg-warning">{{ complaint.status }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
